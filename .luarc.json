@@ -1,0 +1,8 @@
+{
+    "diagnostics.globals": [],
+    "workspace.library": ["C:\\Program Files (x86)\\Steam\\steamapps\\common\\Factorio\\doc-html\\factorio"],
+    "runtime.version": "Lua 5.2",
+    "diagnostics.disable": [
+        "lowercase-global"
+    ]
+}
