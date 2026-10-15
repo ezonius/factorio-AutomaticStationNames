@@ -1,12 +1,18 @@
 require('serpent')
+if not global then global = {} end
 
 -- Functions for keeping track of all station names
 -- TODO: handle forces being removed / merged?
 function get_all_station_names(force)
-  if global.all_station_names == nil then global.all_station_names = {} end
-  if global.all_station_names[force.name] == nil then global.all_station_names[force.name] = {} end
+  if global.all_station_names == nil then 
+    global.all_station_names = {} 
+  end
+  if global.all_station_names[force.name] == nil then 
+    global.all_station_names[force.name] = {} 
+  end
   return global.all_station_names[force.name]
 end
+
 function add_station_name(force, name)
   local all_station_names = get_all_station_names(force)
   if all_station_names[name] == nil then
@@ -77,6 +83,7 @@ commands.add_command("AutomaticStationNames_refresh_station_names", "Refresh the
   refresh_station_names(player)
 end)
 script.on_init(function()
+  global.all_station_names = {}  -- Inicjalizacja tabeli na nazwy stacji
   refresh_station_names(nil)
 end)
 
@@ -205,31 +212,31 @@ function cleanup_train_station_name(entity)
 end
 
 function on_new_entity(entity)
-  if not entity.valid then return end
+  if not entity or not entity.valid then return end  -- Sprawdzenie, czy `entity` istnieje i jest poprawne
   if not entity.supports_backer_name() then return end
   
-  if entity.type == 'train-stop' then -- Update global.all_station_names and fix station name
-    --local player = game.players[event.player_index or 1]
-    --player.print('New train station: ' .. serpent.block(entity) .. serpent.block(entity.supports_backer_name()) .. serpent.block(entity.backer_name))
-    
+  if entity.type == 'train-stop' then -- Aktualizacja `global.all_station_names` i zmiana nazwy stacji
     add_station_name(entity.force, entity.backer_name)
-    
     fix_train_station_name(entity, true)
-  elseif entity.type == 'entity-ghost' and entity.ghost_type == 'train-stop' then -- Clean up station name
-    --local player = game.players[event.player_index or 1]
-    --player.print('New train station ghost: ' .. serpent.block(entity) .. serpent.block(entity.supports_backer_name()) .. serpent.block(entity.backer_name))
-
+  elseif entity.type == 'entity-ghost' and entity.ghost_type == 'train-stop' then -- Czyszczenie nazwy stacji
     cleanup_train_station_name(entity)
   end
 end
+
 function on_new_entity_1(event)
-  local entity = event.created_entity
-  on_new_entity(entity)
+  local entity = event.entity
+  if entity then
+    on_new_entity(entity)
+  end
 end
+
 function on_new_entity_2(event)
   local entity = event.entity
-  on_new_entity(entity)
+  if entity then
+    on_new_entity(entity)
+  end
 end
+
 script.on_event({defines.events.on_built_entity, defines.events.on_robot_built_entity}, on_new_entity_1)
 -- script_raised_revive is emitted e.g. by the 'Nanobots' mod
 script.on_event({defines.events.script_raised_built, defines.events.script_raised_revive}, on_new_entity_2)
